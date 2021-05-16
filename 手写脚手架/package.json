@@ -1,0 +1,17 @@
+{
+  "name": "lh",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "lh": "index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "rayhomie <1572801584@qq.com>",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^7.2.0"
+  }
+}
