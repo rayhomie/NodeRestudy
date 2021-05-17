@@ -1,0 +1,14 @@
+{
+  "name": "picbuffer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "buffer图片文件处理.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "rayhomie <1572801584@qq.com>",
+  "license": "MIT",
+  "dependencies": {
+    "sharp": "^0.28.2"
+  }
+}
