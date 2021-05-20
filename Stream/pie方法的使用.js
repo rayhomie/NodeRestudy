@@ -7,4 +7,4 @@ const reader = fs.createReadStream('./read.txt', {
 
 reader.pipe(writer)//将读到的值，导入输出流
 
-writer.close()
+// writer.close()
