@@ -1,5 +1,6 @@
 # NodeRestudy
 2021.5月，重学node
+
 ## 1】浏览器引擎
 
 ### 浏览器内核
@@ -293,50 +294,7 @@ require.js的使用：
 ```
 
 ```js
-//------------ index.js --------------
-//入口用于声明配置管理模块
-(function () {
-  //require是外部require.js加载的全局变量
-  require.config({//需要配置
-    baseUrl: '',
-    paths: {//模块名与路径的映射(不加后缀名)
-      "module1": "./modules/module1",
-      "module2": "./modules/module2"
-    }
-  })
-
-  //加载module2.js中的代码
-  require(['module2'], function (module2) {
-    console.log(module2);
-  })
-})()
-
-//------------ ./modules/module1.js --------------
-//每个模块需要使用define来定义
-define(function () {
-  const name = 'rayhomie'
-  const age = 20
-  const sayHello = (name) => {
-    console.log('你好' + name)
-  }
-
-  return {//暴露给外部
-    name,
-    age,
-    sayHello
-  }
-})
-
-//------------ ./modules/module2.js --------------
-//每个模块需要使用define来定义
-define([
-  'module1'//依赖的模块
-], function (module1) {//使用参数来接收导入的变量
-  console.log(module1.name)
-  console.log(module1.age)
-  module1.sayHello('leihao')
-  return {}
-})
+//------------ index.js --------------//入口用于声明配置管理模块(function () {  //require是外部require.js加载的全局变量  require.config({//需要配置    baseUrl: '',    paths: {//模块名与路径的映射(不加后缀名)      "module1": "./modules/module1",      "module2": "./modules/module2"    }  })  //加载module2.js中的代码  require(['module2'], function (module2) {    console.log(module2);  })})()//------------ ./modules/module1.js --------------//每个模块需要使用define来定义define(function () {  const name = 'rayhomie'  const age = 20  const sayHello = (name) => {    console.log('你好' + name)  }  return {//暴露给外部    name,    age,    sayHello  }})//------------ ./modules/module2.js --------------//每个模块需要使用define来定义define([  'module1'//依赖的模块], function (module1) {//使用参数来接收导入的变量  console.log(module1.name)  console.log(module1.age)  module1.sayHello('leihao')  return {}})
 ```
 
 ### CMD
@@ -347,11 +305,33 @@ define([
 - CMD规范的实现，比较常用的库是：Sea.js
 
 ```html
-<!-- index.html --> <script src="./lib/sea.js"></script><script>  //直接使用脚本的主入口(区别于AMD，主入口中不需要配置管理各个模块)。  seajs.use('./index.js')</script>
+<!-- index.html --> 
+<script src="./lib/sea.js"></script>
+<script>
+  //直接使用脚本的主入口(区别于AMD，主入口中不需要配置管理各个模块)。
+  seajs.use('./index.js')
+</script>
 ```
 
 ```js
-//------------ index.js --------------define(function (require, exports, module) {  //和Commonjs规范差不多的导出导入  const { name, age, sayHello } = require('./modules/module1.js')  console.log(name);  console.log(age);  sayHello('leihao')})//------------ ./modules/module1.js --------------define(function (require, exports, module) {  const name = 'rayhomie'  const age = 20  const sayHello = function (name) {    console.log('你好', name);  }  //和Commonjs规范差不多的导出导入  module.exports = { name, age, sayHello }})
+//------------ index.js --------------
+define(function (require, exports, module) {
+  //和Commonjs规范差不多的导出导入
+  const { name, age, sayHello } = require('./modules/module1.js')
+  console.log(name);
+  console.log(age);
+  sayHello('leihao')
+})
+//------------ ./modules/module1.js --------------
+define(function (require, exports, module) {
+  const name = 'rayhomie'
+  const age = 20
+  const sayHello = function (name) {
+    console.log('你好', name);
+  }
+  //和Commonjs规范差不多的导出导入
+  module.exports = { name, age, sayHello }
+})
 ```
 
 ### ES Module
@@ -419,15 +399,7 @@ define([
 **ESM由js引擎解析，在解析时已经确定了模块的依赖关系**（在转换成AST之前），所以导入必须写在模块最前面。但ESM还提供了`import()`的运行时环境（异步加载）。（浏览器环境没有`require()`来加载模块，因为不支持CommonJS）
 
 ```js
-//------------ index.js --------------
-let flag = true;
-if (flag) {//运行时环境
-  const promise = import('./modules/module1.js')
-  //返回promise
-  promise.then((res) => {
-    console.log(res);
-  })
-}
+//------------ index.js --------------let flag = true;if (flag) {//运行时环境  const promise = import('./modules/module1.js')  //返回promise  promise.then((res) => {    console.log(res);  })}
 ```
 
 在webpack中使用ESM规范的`import()`会将该文件进行单独打包，用于动态加载。
@@ -503,16 +475,7 @@ node的JS引擎也是本身有ES module的实现，但是默认是使用的Commo
 写一个resolve方法：
 
 ```js
-const resolve = dir => path.resolve(__dirname, dir)
-console.log(resolve('src'));///Users/mac/src
-
-//webpack中就使用这样的方式起别名：
-{
-  alias:{
-    "@":resolve("src"),
-    "components":resolve("src/components")
-  }
-}
+const resolve = dir => path.resolve(__dirname, dir)console.log(resolve('src'));///Users/mac/src//webpack中就使用这样的方式起别名：{  alias:{    "@":resolve("src"),    "components":resolve("src/components")  }}
 ```
 
 ##### ②获取路径信息
@@ -528,27 +491,7 @@ console.log(resolve('src'));///Users/mac/src
 ①同步操作②异步回调③异步promises
 
 ```js
-const fs = require('fs')
-
-const filePath = './text.txt'
-
-//同步操作
-const syncFile = fs.readFileSync(filePath)
-console.log(syncFile);
-
-//异步回调
-fs.readFile(filePath, (err, data) => {
-  if (err) {
-    console.log(err);
-    return;
-  }
-  console.log('读取的内容是：', data)//默认是读取到十六进制的buffer类型
-  console.log(data.toString())//Buffer转成String类型
-})
-
-//使用promises
-const promisesFile = fs.promises.readFile(filePath)
-promisesFile.then(data => console.log(data))
+const fs = require('fs')const filePath = './text.txt'//同步操作const syncFile = fs.readFileSync(filePath)console.log(syncFile);//异步回调fs.readFile(filePath, (err, data) => {  if (err) {    console.log(err);    return;  }  console.log('读取的内容是：', data)//默认是读取到十六进制的buffer类型  console.log(data.toString())//Buffer转成String类型})//使用promisesconst promisesFile = fs.promises.readFile(filePath)promisesFile.then(data => console.log(data))
 ```
 
 ### events模块
@@ -642,8 +585,7 @@ npx是npm5.2之后自带的一个工具
 下面这个就是在index.js文件中写了一句shebang代码，表示的是别人在运行这个脚本的时候，需要根据环境去找node可执行文件，然后找到node之后去执行index.js后面的代码内容。
 
 ```js
-#!/usr/bin/env node
-console.log('hello world')
+#!/usr/bin/env nodeconsole.log('hello world')
 ```
 
 ### 配置bin字段
@@ -651,20 +593,7 @@ console.log('hello world')
 在package.json中有一个**bin字段**，可以对当前包的终端命令行进行配置：
 
 ```json
-{
-  "name": "lh",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "bin": {//配置命令行
-    "lh": "index.js"//当别人安装我们的包之后，可以指向lh命令。然后就去运行index.js
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "rayhomie <1572801584@qq.com>",
-  "license": "MIT"
-}
+{  "name": "lh",  "version": "1.0.0",  "description": "",  "main": "index.js",  "bin": {//配置命令行    "lh": "index.js"//当别人安装我们的包之后，可以指向lh命令。然后就去运行index.js  },  "scripts": {    "test": "echo \"Error: no test specified\" && exit 1"  },  "author": "rayhomie <1572801584@qq.com>",  "license": "MIT"}
 ```
 
 流程：但别人安装了我们的包之后可以使用我们在bin中定义的`lh`命令，去执行`index.js`文件，而且会根据文件中的`shebang`指令去当前环境找node，器执行文件中的脚本。
@@ -680,19 +609,13 @@ console.log('hello world')
 例子，写一个`lh --version`查看版本号的命令。
 
 ```js
-#!/usr/bin/env node
-//参数-v,--version获取版本号
-process.argv.find(item => ['--version', '-V'].includes(item))
-  && console.log(require('./package.json').version);
+#!/usr/bin/env node//参数-v,--version获取版本号process.argv.find(item => ['--version', '-V'].includes(item))  && console.log(require('./package.json').version);
 ```
 
 这样通过process.argv来获取参数判断显然很麻烦，所以我们可以使用一个**commander库**进行命令行开发更方便。
 
 ```js
-#!/usr/bin/env node
-const program = require('commander')
-program.version(require('./package.json').version)
-program.parse(process.argv)//解析参数,--help
+#!/usr/bin/env nodeconst program = require('commander')program.version(require('./package.json').version)program.parse(process.argv)//解析参数,--help
 ```
 
 此时在终端输入`lh --help`可以解析出所有的参数。`lh --version`就可以显示当前版本号。
@@ -700,39 +623,7 @@ program.parse(process.argv)//解析参数,--help
 ### [commander](https://github.com/tj/commander.js/blob/master/Readme_zh-CN.md)
 
 ```js
-#!/usr/bin/env node
-const program = require('commander')
-//查看版本号
-program.version(require('./package.json').version)
-
-//添加自己的options
-program.option('-h --lh', 'a lh cli')
-//手动设置路径，<>为可选参数
-program.option('-d --dest <dest>', 'a destination folder, example: -d /src/components')
-//监听参数传递
-program.on('--help', function () {
-  console.log('监听到--help!!!');
-})
-
-//解析一定要写在参数配置的后面
-program.parse(process.argv)
-
-/*
-//在program.parse后面可以获取到参数信息
-const opts = program.opts()
-//lh -h，打印：true
-console.log(opts.lh);
-//lh -d /src/components，打印：/src/components
-console.log(opts.dest);
-*/
-
-//命令
-program
-  .command('create <project> [others...]')//创建命令
-  .description('clone repository into a folder')//描述
-  .action((project, others) => {//可以获取参数
-  console.log(project, others);
-})//触发
+#!/usr/bin/env nodeconst program = require('commander')//查看版本号program.version(require('./package.json').version)//添加自己的optionsprogram.option('-h --lh', 'a lh cli')//手动设置路径，<>为可选参数program.option('-d --dest <dest>', 'a destination folder, example: -d /src/components')//监听参数传递program.on('--help', function () {  console.log('监听到--help!!!');})//解析一定要写在参数配置的后面program.parse(process.argv)/*//在program.parse后面可以获取到参数信息const opts = program.opts()//lh -h，打印：trueconsole.log(opts.lh);//lh -d /src/components，打印：/src/componentsconsole.log(opts.dest);*///命令program  .command('create <project> [others...]')//创建命令  .description('clone repository into a folder')//描述  .action((project, others) => {//可以获取参数  console.log(project, others);})//触发
 ```
 
 ### [download-git-repo](https://www.npmjs.com/package/download-git-repo)
@@ -744,11 +635,7 @@ program
 在node中可以使用node提供的工具，将回调形式转成promise
 
 ```js
-const { promisify } = require('util')
-
-const download = promisify(require('download-git-repo'))
-
-download(...).then(res=>{ }).catch(err=>{ })
+const { promisify } = require('util')const download = promisify(require('download-git-repo'))download(...).then(res=>{ }).catch(err=>{ })
 ```
 
 ### node执行终端命令
@@ -756,35 +643,7 @@ download(...).then(res=>{ }).catch(err=>{ })
 需要用到[child_process模块](https://nodejs.org/dist/latest-v16.x/docs/api/child_process.html#child_process_child_process_spawn_command_args_options)（封装terminal.js）
 
 ```js
-//进程通信
-const { exec, spawn } = require('child_process')
-
-const commandSpawn = (...args) => {
-  return new Promise((resolve, reject) => {
-    //创建子进程，执行终端命令，并返回子进程，获取子进程信息
-    const childProcess = spawn(...args)//返回值是该子进程（进行进程间通信）
-    childProcess.stdout.pipe(process.stdout)//将子进程的输出流导入到当前进程的输出流中
-    childProcess.stderr.pipe(process.stderr)//错误信息导入
-    childProcess.on('close', () => {
-      resolve()
-    })//监听关闭
-  })
-}
-const commandExec = (...args) => {
-  return new Promise((resolve, reject) => {
-    const childProcess = exec(...args)
-    childProcess.stdout.pipe(process.stdout)
-    childProcess.stderr.pipe(process.stderr)
-    childProcess.on('close', () => {
-      resolve()
-    })
-  })
-}
-
-module.exports = {
-  commandSpawn,
-  commandExec
-}
+//进程通信const { exec, spawn } = require('child_process')const commandSpawn = (...args) => {  return new Promise((resolve, reject) => {    //创建子进程，执行终端命令，并返回子进程，获取子进程信息    const childProcess = spawn(...args)//返回值是该子进程（进行进程间通信）    childProcess.stdout.pipe(process.stdout)//将子进程的输出流导入到当前进程的输出流中    childProcess.stderr.pipe(process.stderr)//错误信息导入    childProcess.on('close', () => {      resolve()    })//监听关闭  })}const commandExec = (...args) => {  return new Promise((resolve, reject) => {    const childProcess = exec(...args)    childProcess.stdout.pipe(process.stdout)    childProcess.stderr.pipe(process.stderr)    childProcess.on('close', () => {      resolve()    })  })}module.exports = {  commandSpawn,  commandExec}
 ```
 
 进行调用执行终端命令。具体exec和spawn的参数可以在[官网](https://nodejs.org/dist/latest-v16.x/docs/api/child_process.html#child_process_child_process_spawn_command_args_options)查看。
@@ -798,29 +657,7 @@ commandSpawn(npm, ['install', '--force'], { cwd: `./${project}` })//cwd选择执
 这里就举个栗子，修改packge.json中的name字段
 
 ```js
-const path = require('path')
-//使用promisify包裹
-const { promisify } = require('util')
-const readFile = promisify(require('fs').readFile)
-const writeFile = promisify(require('fs').writeFile)
-
-async function writeProjectName(Path, name) {//修改package.json的name（传入的参数是项目根路径，name字段需要更改的名字）
-  //读取文件
-  const data = await readFile(path.join(Path, 'package.json'), 'utf8')
-  const newList = {}//暂存新对象
-  const list = JSON.parse(data)
-  for (let key in list) {
-    if (key === 'name') {
-      newList[key] = name
-      continue
-    }
-    newList[key] = list[key];
-  }
-  let newContent = JSON.stringify(newList, null, 2);
-  //重写文件
-  await writeFile(path.join(Path, 'package.json'), newContent, 'utf8')
-}
-module.exports = writeProjectName
+const path = require('path')//使用promisify包裹const { promisify } = require('util')const readFile = promisify(require('fs').readFile)const writeFile = promisify(require('fs').writeFile)async function writeProjectName(Path, name) {//修改package.json的name（传入的参数是项目根路径，name字段需要更改的名字）  //读取文件  const data = await readFile(path.join(Path, 'package.json'), 'utf8')  const newList = {}//暂存新对象  const list = JSON.parse(data)  for (let key in list) {    if (key === 'name') {      newList[key] = name      continue    }    newList[key] = list[key];  }  let newContent = JSON.stringify(newList, null, 2);  //重写文件  await writeFile(path.join(Path, 'package.json'), newContent, 'utf8')}module.exports = writeProjectName
 ```
 
 ## 10】Buffer
@@ -836,21 +673,7 @@ module.exports = writeProjectName
 - Node中通过TCP建立长连接，TCP传输的是字节流，我们需要将数据转成字节再进行传入，并且需要知道传输字节的大小（客户端需要根据大小来判断读取多少内容）
 
 ```js
-//推荐使用Buffer.from,而不是new Buffer
-
-const message = '你好啊'
-//1.对中文使用buffer进行utf8的编码 
-let utf8buffer = Buffer.from(message, 'utf8')
-console.log(utf8buffer);// <Buffer e4 bd a0 e5 a5 bd e5 95 8a>
-//2.toString默认对utf8解码
-console.log(utf8buffer.toString());// 你好啊
-console.log(utf8buffer.toString('utf16le'))// 뷤붥闥
-
-//1.对中文使用buffer进行utf16le的编码 
-let utf16lebuffer = Buffer.from(message, 'utf16le')
-console.log(utf16lebuffer);// <Buffer 60 4f 7d 59 4a 55>
-//2.toString对utf16le解码
-console.log(utf16lebuffer.toString('utf16le'));// 你好啊
+//推荐使用Buffer.from,而不是new Bufferconst message = '你好啊'//1.对中文使用buffer进行utf8的编码 let utf8buffer = Buffer.from(message, 'utf8')console.log(utf8buffer);// <Buffer e4 bd a0 e5 a5 bd e5 95 8a>//2.toString默认对utf8解码console.log(utf8buffer.toString());// 你好啊console.log(utf8buffer.toString('utf16le'))// 뷤붥闥//1.对中文使用buffer进行utf16le的编码 let utf16lebuffer = Buffer.from(message, 'utf16le')console.log(utf16lebuffer);// <Buffer 60 4f 7d 59 4a 55>//2.toString对utf16le解码console.log(utf16lebuffer.toString('utf16le'));// 你好啊
 ```
 
 ### buffer的创建方式
@@ -864,32 +687,13 @@ console.log(utf16lebuffer.toString('utf16le'));// 你好啊
 #### [Buffer.from](https://nodejs.org/dist/latest-v16.x/docs/api/buffer.html#buffer_static_method_buffer_from_string_encoding)
 
 ```js
-//Buffer.from(string[, encoding])
-const buf1 = Buffer.from('buffer');
-const buf2 = Buffer.from(buf1);
-
-buf1[0] = 0x61;
-
-console.log(buf1.toString());
-// Prints: auffer
-console.log(buf2.toString());
-// Prints: buffer
+//Buffer.from(string[, encoding])const buf1 = Buffer.from('buffer');const buf2 = Buffer.from(buf1);buf1[0] = 0x61;console.log(buf1.toString());// Prints: aufferconsole.log(buf2.toString());// Prints: buffer
 ```
 
 #### [Buffer.alloc](https://nodejs.org/dist/latest-v16.x/docs/api/buffer.html#buffer_static_method_buffer_alloc_size_fill_encoding)
 
 ```js
-//Buffer.alloc(size[,fill[,encoding]])
-let buffer = Buffer.alloc(8)//给当前buffer分配8个字节内存
-console.log(buffer);// <Buffer 00 00 00 00 00 00 00 00>
-//直接修改buffer内容
-buffer[0] = 88// 十进制的88
-buffer[1] = 0x88// 十六进制的88
-console.log(buffer);// <Buffer 58 88 00 00 00 00 00 00>
-
-let fillbuffer= Buffer.alloc(8,'12')// 分配8字节并填充满字符串
-console.log(fillbuffer);// <Buffer 31 32 31 32 31 32 31 32>
-console.log(fillbuffer.toString());// 12121212
+//Buffer.alloc(size[,fill[,encoding]])let buffer = Buffer.alloc(8)//给当前buffer分配8个字节内存console.log(buffer);// <Buffer 00 00 00 00 00 00 00 00>//直接修改buffer内容buffer[0] = 88// 十进制的88buffer[1] = 0x88// 十六进制的88console.log(buffer);// <Buffer 58 88 00 00 00 00 00 00>let fillbuffer= Buffer.alloc(8,'12')// 分配8字节并填充满字符串console.log(fillbuffer);// <Buffer 31 32 31 32 31 32 31 32>console.log(fillbuffer.toString());// 12121212
 ```
 
 ### Buffer和文件操作
@@ -897,35 +701,346 @@ console.log(fillbuffer.toString());// 12121212
 **读取文件的本质都是读取二进制数据**
 
 ```js
-//文本文件处理
+//文本文件处理const fs = require('fs')fs.readFile('./text.txt', { encoding: 'utf8' }, (err, data) => {  console.log(data);// 雷浩})fs.readFile('./text.txt', (err, data) => {  console.log(data);// <Buffer e9 9b b7 e6 b5 a9>  console.log(data.toString());// 雷浩})
+```
+
+### 使用[sharp](https://github.com/lovell/sharp#documentation)处理图片文件
+
+（它内部也是需要拿到buffer数据来处理图片）
+
+```js
+//处理图片文件const fs = require('fs')//使用sharp库来处理图片数据https://github.com/lovell/sharp#documentationconst sharp = require('sharp');//方式一：传入bufferfs.readFile('./picture.jpg', (err, data) => {  sharp(data)    .resize(20, 20)    .toFile('./20x20.jpg')})//方式二：传入路径sharp('./picture.jpg')  .resize(100, 100)  .toFile('./100x100.jpg')
+```
+
+## 11】事件循环和异步IO
+
+### 事件循环
+
+- 事实上我们把事件循环理解成我们编写的JavaScript和浏览器或者Node之间的一个桥梁。
+- 浏览器事件循环是一个我们编写的JavaScript代码和浏览器Api调用（setTimeout/AJAX/监听事件等）的一个桥梁，桥梁之间他们通过回调函数进行沟通。
+- Node的事件循环是一个我们编写的JavaScript代码和系统调用（fs、network）之间的一个桥梁，桥梁之间他们通过回调函数进行沟通。
+
+### 进程和线程
+
+- 进程（process）：计算机已经运行的应用程序；
+- 线程（thread）：操作系统中能够运行运算调度的最小单位；
+- 进程可以看成线程的容器。
+
+### 浏览器事件循环
+
+宏任务：同步代码、timer回调、浏览器事件回调、ajax回调、DOM监听、UI Rendering
+
+微任务：Promise的then回调、Mutation Observer API、queueMicrotask()等
+
+宏任务执行结束完成后立即去**清空微任务队列**，直到微任务被清空才去执行下一轮宏任务。（**只维护两个队列：消息队列和微任务队列**）
+
+- 在执行任何**一个宏任务**之前（不是列队，是一个宏任务），都会先去查看微任务队列中是否有任务需要执行
+  - 也就是宏任务执行之前，必须保证微任务队列是空的
+  - 如果不为空，那么就优先执行微任务队列中的任务（回调）
+
+```html
+<script>  console.log('开始')  setTimeout(() => {    console.log('结束')  }, 0)  new Promise((resolve, reject) => {    resolve('then')  }).then(res => console.log(res))  for (let i = 0; i < 1000000000; i++) {  }  //顺序：开始----------->then-->结束  //等待若干秒后才执行结束。因为timer的回调需要等待宏任务结束才执行  //浏览器事件、ajax等和timer一样都是异步宏任务，会被加到宏任务队列</script>
+```
+
+#### 题目一：
+
+```js
+setTimeout(() => {  console.log('set1');  new Promise((resolve) => {    resolve()  }).then(() => {    new Promise((resolve) => {      resolve()    }).then(() => {      console.log('then4');    })    console.log('then2');  })})new Promise((resolve) => {  console.log('pr1');  resolve()}).then(() => {  console.log('then1');})setTimeout(() => {  console.log('set2');})console.log(2);queueMicrotask(() => {  console.log('queueMicrotask1');})new Promise((resolve) => {  resolve()}).then(() => {  console.log('then3');})//答案：/*pr12then1queueMicrotask1then3set1then2then4set2*/
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210517164211964.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTIyMTAzNg==,size_16,color_FFFFFF,t_70)
+
+#### 题目二：
+
+```js
+async function async1() {
+  console.log('async1 start');
+  await async2();
+  console.log('async1 end');
+}
+
+async function async2() {
+  console.log('async2');
+}
+
+console.log('script start');
+
+setTimeout(() => {
+  console.log('setTimeout')
+}, 0)
+
+async1()
+
+new Promise((resolve) => {
+  console.log('promise1');
+  resolve()
+}).then(() => {
+  console.log('promise2');
+})
+
+console.log('script end');
+
+//答案：
+/*
+script start
+async1 start
+async2
+promise1
+script end
+async1 end
+promise2
+setTimeout
+*/
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/2021051716583952.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTIyMTAzNg==,size_16,color_FFFFFF,t_70)
+
+`await async2()`可以看做成`new Promise(resolve=>{ async2() .. })`
+
+`await`下面的代码就是认为是`then`回调函数中的代码
+
+### Node事件循环
+
+#### node架构分析
+
+**浏览器**中的EventLoop是根据**HTML5规范**来实现的，不同的浏览器可能会有不同的实现，而**Node**中是由**libuv**实现的。
+
+- libuv中主要维护了一个EventLoop和worker threads（线程池），libuv是一个多平台的专注于异步IO的库。libuv采用的是**非阻塞异步IO**的调用方式
+- Event Loop负责调用系统的一些其他操作：文件的IO、Network、child-process等
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210517175205873.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTIyMTAzNg==,size_16,color_FFFFFF,t_70)
+
+#### 阻塞IO和非阻塞IO
+
+操作系统通常提供了两种调用方式：**阻塞式调用**和**非阻塞式调用**
+
+- 阻塞式调用：调用结果返回之前，当前线程处于阻塞态（阻塞态CPU是不会分配时间片的）调用线程只有在得到调用结果之后才会继续执行
+- 非阻塞式调用：调用执行之后，当前线程不会停止执行，只需要过一段时间来检查一下有没有结果返回即可（**轮询操作**：需要知道是否系统调用完成）
+
+开发中的很多**耗时操作**都是基于**非阻塞式调用**：
+
+- 网络请求本身使用了**Socket通信**，而Socket本身提供了select模型，可以进行非阻塞式的工作
+- 文件读写的**IO操作**，我们可以使用操作系统提供的基于事件的回调机制
+
+如果主线程频繁的去进行轮询的工作，那么必然会大大降低性能，并且开发中我们不只是一个文件的读写，可能是多个文件，而且可能是多个功能的系统非阻塞式调用，如：网络IO、数据库IO、子进程调用等。所以libuv提供了一个**线程池（thread pool）**:
+
+- 线程池会负责所有相关的操作，并且会通过轮询或者其他的方式等待结果
+- 当获取到结果时，就可以将对应的**回调函数**放到事件循环中（**某一个事件队列**）
+- 事件循环就可以负责接管后续的回调工作，告知JavaScript应用程序执行对应的回调函数
+
+#### 阻塞和非阻塞，同步和异步的区别？
+
+阻塞和非阻塞是对于被调用者来说的
+
+- 这里就是系统调用，操作系统为我们提供了阻塞调用和非阻塞调用
+
+同步和异步是对于调用者来说的
+
+- 我们在程序中发起调用之后，不会进行其他任何的操作，只是等待结果，这个过程就称之为**同步调用**
+- 发起调用之后，并不会等待结果，继续完成其他的工作，等到有回调时再去执行，这个过程就是**异步调用**
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210517192545749.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTIyMTAzNg==,size_16,color_FFFFFF,t_70)
+
+#### node事件循环阶段
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210517203309929.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTIyMTAzNg==,size_16,color_FFFFFF,t_70)
+
+无论是我们的文件IO、数据库、网络IO、定时器、子进程，在完成对应的操作后，都会将对应的结果和回调函数放到事件循环（任务队列）中，事件循环会不断地从任务队列中取出对应的事件（回调函数）来执行。
+
+Node中**一次完整的事件循环Tick分成很多个阶段**：（也就是我们注册调度任务（交给Node完成一些IO事件），Node处理完成之后，将结果以回调函数的形式返回给我们，这些回调函数按照事件循环的顺序来执行）
+
+- 定时器（Timers）：本阶段执行已经被`setTimeout()`和`setInterval()`的调度回调函数
+- 待定回调（Pending Callback）：对某些系统操作（如TCP错误类型）执行回调，比如TCP连接时接收到ECONNREFUSED
+- Idle、prepare：仅系统内部使用
+- **轮询**（Poll）：检索新的I/O事件；执行与I/O相关的回调；（停留时间最长，希望IO的回调尽早响应）
+- 检测：`setImmediate()`的回调函数在这里执行
+- 关闭的回调函数：一些关闭的回调函数，如：`socket.on('close',...)`
+
+##### 宏任务微任务
+
+Node宏任务：setTimeout、setInterval、IO事件、setImmediate、close事件；
+
+Node微任务：Promise的then回调、queueMicrotask、process.nextTick
+
+注意：process.nextTick是放在单独的一个队列里面存放（不和Promise.then、queueMicrotask放在一起）
+
+##### Node事件循环维护的队列
+
+微任务队列：next ticks队列、其他微任务队列（promise.then、queueMicrotask）
+
+宏任务队列：timers队列（setTimeout、setInterval）、轮询队列（io事件）、check队列（setImmediate）、close队列（close回调）
+
+#### 题目一：
+
+```js
+async function async1() {
+  console.log('async1 start');
+  await async2()
+  console.log('async1 end');
+}
+
+async function async2() {
+  console.log('async2');
+}
+
+console.log('script start');
+
+setTimeout(() => {
+  console.log('setTimeout0');
+}, 0)
+
+setTimeout(() => {
+  console.log('setTimeout2');
+}, 300)
+
+setImmediate(() => console.log('setImmediate'))
+
+process.nextTick(() => console.log('nextTick1'))
+
+async1()
+
+process.nextTick(() => console.log('nextTick2'))
+
+new Promise((resolve) => {
+  console.log('promise1');
+  resolve();
+  console.log('promise2');//会被同步执行
+}).then(() => {
+  console.log('promise3');
+})
+
+console.log('script end');
+
+//答案：
+/*
+script start
+async1 start
+async2
+promise1
+promise2
+script end
+nextTick1
+nextTick2
+async1 end
+promise3
+setTimeout0
+setImmediate
+setTimeout2
+*/
+```
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210517223702827.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTIyMTAzNg==,size_16,color_FFFFFF,t_70)
+
+#### 题目二：
+
+```js
+setTimeout(() => {
+  console.log('setTimeout');
+}, 0)
+
+setImmediate(()=>{
+  console.log('setImmediate');
+})
+
+//答案：
+/*
+setTimeout
+setImmediate
+或者
+setImmediate
+setTimeout
+*/
+```
+
+原因：初始化事件循环队列需要时间，timers的回调先保存到红黑树再放到timers队列中也需要时间，setImmediate的回调不需要保存直接加入到check队列几乎不耗时。
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210518112523418.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTIyMTAzNg==,size_16,color_FFFFFF,t_70)
+
+
+
+## 12】stream
+
+Node中很多对象是基于流实现的：
+
+- http模块的Request和Response对象
+- process.stdout对象
+
+另外：官网说所有的流都是EventEmitter的实例
+
+Nodejs中有四种基本流类型：
+
+- Writable：可以向其写入数据的流（`fs.createReadStream`）
+- Readable：可以从中读取数据的流（`fs.createWriteStream`）
+- Duplex：同时为Readable和Writable的流
+- Transform：Duplex可以在写入和读取数据时修改或转换数据的流
+
+### Readable流的使用
+
+```js
 const fs = require('fs')
 
-fs.readFile('./text.txt', { encoding: 'utf8' }, (err, data) => {
-  console.log(data);// 雷浩
+//流的方式读取
+const reader = fs.createReadStream('./read.txt', {
+  code: 'utf8',
+  highWaterMark: 2//每次最多读两个字节
 })
-fs.readFile('./text.txt', (err, data) => {
-  console.log(data);// <Buffer e9 9b b7 e6 b5 a9>
-  console.log(data.toString());// 雷浩
+//监听data回调获取读取的数据
+reader.on('data', (data) => {
+  console.log(data.toString());
+  reader.pause()//暂停读取
+  setTimeout(() => {
+    reader.resume()//恢复读取
+  }, 1000)
+})
+//监听文件被打开
+reader.on('open', () => {
+  console.log('文件被打开');
+})
+//监听文件关闭
+reader.on('close', () => {
+  console.log('文件被关闭');
 })
 ```
 
-使用[sharp](https://github.com/lovell/sharp#documentation)处理图片文件
+### Writable流的使用
 
 ```js
-//处理图片文件
 const fs = require('fs')
-//使用sharp库来处理图片数据https://github.com/lovell/sharp#documentation
-const sharp = require('sharp');
+const writer = fs.createWriteStream('./write.txt')
 
-//方式一：传入buffer
-fs.readFile('./picture.jpg', (err, data) => {
-  sharp(data)
-    .resize(20, 20)
-    .toFile('./20x20.jpg')
+writer.write('你好啊', (err) => {
+  if (err) {
+    console.log(err);
+    return
+  }
+  console.log('写入成功一次');
 })
-//方式二：传入路径
-sharp('./picture.jpg')
-  .resize(100, 100)
-  .toFile('./100x100.jpg')
+
+writer.write('雷浩',(err)=>{
+  console.log('写入成功二次');
+})
+
+// writer.close()//可以使用close
+writer.end('End')//也可以使用end（传入参数可以写入到文件中）
+
+//监听关闭
+writer.on('close', () => {
+  console.log('文件已关闭');
+})
+```
+
+### pipe方法的使用
+
+```js
+const fs = require('fs')
+const writer = fs.createWriteStream('./write.txt')
+const reader = fs.createReadStream('./read.txt', {
+  code: 'utf8',
+  highWaterMark: 2//每次最多读两个字节
+})
+
+reader.pipe(writer)//将读到的值，导入输出流
+
+writer.close()
 ```
 
