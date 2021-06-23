@@ -305,33 +305,11 @@ require.js的使用：
 - CMD规范的实现，比较常用的库是：Sea.js
 
 ```html
-<!-- index.html --> 
-<script src="./lib/sea.js"></script>
-<script>
-  //直接使用脚本的主入口(区别于AMD，主入口中不需要配置管理各个模块)。
-  seajs.use('./index.js')
-</script>
+<!-- index.html --> <script src="./lib/sea.js"></script><script>  //直接使用脚本的主入口(区别于AMD，主入口中不需要配置管理各个模块)。  seajs.use('./index.js')</script>
 ```
 
 ```js
-//------------ index.js --------------
-define(function (require, exports, module) {
-  //和Commonjs规范差不多的导出导入
-  const { name, age, sayHello } = require('./modules/module1.js')
-  console.log(name);
-  console.log(age);
-  sayHello('leihao')
-})
-//------------ ./modules/module1.js --------------
-define(function (require, exports, module) {
-  const name = 'rayhomie'
-  const age = 20
-  const sayHello = function (name) {
-    console.log('你好', name);
-  }
-  //和Commonjs规范差不多的导出导入
-  module.exports = { name, age, sayHello }
-})
+//------------ index.js --------------define(function (require, exports, module) {  //和Commonjs规范差不多的导出导入  const { name, age, sayHello } = require('./modules/module1.js')  console.log(name);  console.log(age);  sayHello('leihao')})//------------ ./modules/module1.js --------------define(function (require, exports, module) {  const name = 'rayhomie'  const age = 20  const sayHello = function (name) {    console.log('你好', name);  }  //和Commonjs规范差不多的导出导入  module.exports = { name, age, sayHello }})
 ```
 
 ### ES Module
@@ -739,13 +717,75 @@ const path = require('path')//使用promisify包裹const { promisify } = require
   - 如果不为空，那么就优先执行微任务队列中的任务（回调）
 
 ```html
-<script>  console.log('开始')  setTimeout(() => {    console.log('结束')  }, 0)  new Promise((resolve, reject) => {    resolve('then')  }).then(res => console.log(res))  for (let i = 0; i < 1000000000; i++) {  }  //顺序：开始----------->then-->结束  //等待若干秒后才执行结束。因为timer的回调需要等待宏任务结束才执行  //浏览器事件、ajax等和timer一样都是异步宏任务，会被加到宏任务队列</script>
+<script>
+  console.log('开始')
+  setTimeout(() => {
+    console.log('结束')
+  }, 0)
+  new Promise((resolve, reject) => {
+    resolve('then')
+  }).then(res => console.log(res))
+  for (let i = 0; i < 1000000000; i++) {
+  }
+  //顺序：开始----------->then-->结束
+  //等待若干秒后才执行结束。因为timer的回调需要等待宏任务结束才执行
+  //浏览器事件、ajax等和timer一样都是异步宏任务，会被加到宏任务队列
+</script>
 ```
 
 #### 题目一：
 
 ```js
-setTimeout(() => {  console.log('set1');  new Promise((resolve) => {    resolve()  }).then(() => {    new Promise((resolve) => {      resolve()    }).then(() => {      console.log('then4');    })    console.log('then2');  })})new Promise((resolve) => {  console.log('pr1');  resolve()}).then(() => {  console.log('then1');})setTimeout(() => {  console.log('set2');})console.log(2);queueMicrotask(() => {  console.log('queueMicrotask1');})new Promise((resolve) => {  resolve()}).then(() => {  console.log('then3');})//答案：/*pr12then1queueMicrotask1then3set1then2then4set2*/
+setTimeout(() => {
+  console.log('set1');
+
+  new Promise((resolve) => {
+    resolve()
+  }).then(() => {
+    new Promise((resolve) => {
+      resolve()
+    }).then(() => {
+      console.log('then4');
+    })
+    console.log('then2');
+  })
+})
+
+new Promise((resolve) => {
+  console.log('pr1');
+  resolve()
+}).then(() => {
+  console.log('then1');
+})
+
+setTimeout(() => {
+  console.log('set2');
+})
+
+console.log(2);
+
+queueMicrotask(() => {
+  console.log('queueMicrotask1');
+})
+
+new Promise((resolve) => {
+  resolve()
+}).then(() => {
+  console.log('then3');
+})
+
+//答案：
+/*
+pr1
+2
+then1
+queueMicrotask1
+then3
+set1
+then2
+then4
+set2
+*/
 ```
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20210517164211964.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NTIyMTAzNg==,size_16,color_FFFFFF,t_70)
@@ -958,7 +998,7 @@ setTimeout
 
 
 
-## 12】stream
+## 12】Stream
 
 Node中很多对象是基于流实现的：
 
@@ -1044,3 +1084,75 @@ reader.pipe(writer)//将读到的值，导入输出流
 writer.close()
 ```
 
+
+
+## 13】Http
+
+web服务器：当客户端需要某一个资源时，可以向一台服务器，通过Http请求获取到这个资源；提供资源的这个服务器，就是web服务器。
+
+### 创建web服务器
+
+```js
+const http = require("http");
+
+//创建一个web服务器
+const server = http.createServer((req, res) => {
+  res.end("hello server");
+});
+
+//启动服务器
+server.listen(3000, () => {
+  console.log(`~服务器已经启动在3000端口~`);
+});
+```
+
+由于原生http较为复杂：url判断、method判断、参数处理、逻辑代码处理等，所以我们需要框架进行处理。
+
+
+
+## 14】Express
+
+Express整个框架的核心就是中间件，理解了中间件其他都很简单，其实中间件就是一个回调函数。
+
+### 使用方式
+
+方式一：通过`express-generator`脚手架创建
+
+```bash
+#安装
+npm i -g express-generator
+#创建脚手架模板
+express demo_name
+```
+
+方式二：从零自己搭建
+
+```js
+const express = require("express");
+
+//express其实是一个函数：createApplication => 返回app对象
+const app = express();
+
+//监听默认路径
+app.get("/", (req, res, next) => {
+  res.end("hello get express");
+});
+
+app.post("/", (req, res, next) => {
+  res.end("hello post express");
+});
+
+//开启监听
+app.listen(8888, () => {
+  console.log("express服务器启动成功");
+});
+```
+
+express是一个路由和中间件的web框架，它本身的功能非常少，Express应用程序的本质上是一系列中间件函数的调用。
+
+中间件：本质上就是一个回调函数
+
+- 这个回调函数接收三个参数：
+  - 请求对象（request对象）
+  - 响应对象（response对象）
+  - next函数（在express中定义的用于执行下一个中间件的函数）
