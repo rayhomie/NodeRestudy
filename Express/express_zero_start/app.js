@@ -4,9 +4,19 @@ const express = require("express");
 const app = express();
 
 //监听默认路径
-app.get("/", (req, res, next) => {
-  res.end("hello get express");
-});
+app.get(
+  "/",
+  (req, res, next) => {
+    console.log(1);
+    next();
+    console.log(3);
+  },
+  (req, res, next) => {
+    console.log(2);
+    next();
+    console.log(4);
+  }
+);
 
 app.post("/", (req, res, next) => {
   res.end("hello post express");
